@@ -3,10 +3,11 @@ version: 2
 sphinx:
   configuration: doc/conf.py
 
-mamba:
+conda:
   environment: environment.yml
   CONDA_USES_MAMBA: true
-conda:
+
+build:
   image: latest
   apt_packages:
     - gcc
