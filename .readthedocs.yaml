@@ -5,8 +5,8 @@ sphinx:
 
 mamba:
   environment: environment.yml
-
-build:
+  CONDA_USES_MAMBA: true
+conda:
   image: latest
   apt_packages:
     - gcc
