@@ -3,7 +3,7 @@ version: 2
 sphinx:
   configuration: doc/conf.py
 
-conda:
+mamba:
   environment: environment.yml
 
 build:
