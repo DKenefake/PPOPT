@@ -20,3 +20,4 @@ dependencies:
   - pip:
     - gurobipy
     - pypoman
+prefix: /home/docs/.conda/envs/PPOPT
