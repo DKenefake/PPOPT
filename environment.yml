@@ -5,7 +5,6 @@ channels:
   - http://conda.anaconda.org/gurobi
 dependencies:
   - numpy
-  - pypoman
   - matplotlib
   - scipy
   - numba
@@ -18,3 +17,6 @@ dependencies:
   - cvxopt
   - quadprog
   - python=3.7
+  - pip:
+    - gurobipy
+    - pypoman
