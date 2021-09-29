@@ -1,0 +1,10 @@
+name: PPOPT
+channels:
+  - conda-forge
+  - defaults
+  - http://conda.anaconda.org/gurobi
+dependencies:
+  - numpy
+  - python=3.7
+  - gurobi 
+  - quadprog
