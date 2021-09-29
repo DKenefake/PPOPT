@@ -4,20 +4,5 @@ channels:
   - defaults
   - http://conda.anaconda.org/gurobi
 dependencies:
-  - numpy
-  - matplotlib
-  - scipy
-  - numba
-  - pytest
-  - setuptools
-  - psutil
-  - pathos
-  - plotly
-  - cvxopt
-  - quadprog
-  - llvmlite
   - python=3.7
-  - pip:
-    - gurobipy
-    - pypoman
 prefix: /home/docs/.conda/envs/PPOPT
