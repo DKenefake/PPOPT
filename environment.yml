@@ -5,4 +5,16 @@ channels:
   - http://conda.anaconda.org/gurobi
 dependencies:
   - numpy
+  - pypoman
+  - matplotlib
+  - scipy
+  - numba
+  - gurobipy
+  - pytest
+  - setuptools
+  - psutil
+  - pathos
+  - plotly
+  - cvxopt
+  - quadprog
   - python=3.7
