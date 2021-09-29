@@ -11,3 +11,4 @@ pathos
 plotly
 cvxopt
 quadprog
+git+https://github.com/mmihaltz/pysettrie.git#egg=pysettrie
