@@ -6,9 +6,16 @@ sphinx:
 conda:
   environment: environment.yml
 
+build:
+  image: latest
+  apt_packages:
+    - gcc
+    - libgmp3-dev
+
 python:
   version: 3.7
   install:
     - requirements: doc/requirements.txt
+    - requirements: requirements.txt
     - method: pip
       path: . 
