@@ -5,7 +5,6 @@ sphinx:
 
 conda:
   environment: environment.yml
-  CONDA_USES_MAMBA: true
 
 build:
   image: latest
