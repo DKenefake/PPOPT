@@ -15,6 +15,7 @@ dependencies:
   - plotly
   - cvxopt
   - quadprog
+  - llvmlite
   - python=3.7
   - pip:
     - gurobipy
