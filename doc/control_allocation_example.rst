@@ -232,7 +232,7 @@ mpqp_problem object:
 
 .. code:: python
 
-    from library.ppopt.src.ppopt.mpqp_program import MPQP_Program as mpqp_program
+    from ppopt.mpqp_program import MPQP_Program as mpqp_program
     prog = mpqp_program(A, b, c, H, Q, CRa, CRb, F)
 
 Always consider running this to improve numerics:
@@ -245,7 +245,7 @@ Finally, we execute the optimization process:
 
 .. code:: python
 
-    from library.ppopt.src.ppopt.mp_solvers.solve_mpqp import solve_mpqp, mpqp_algorithm
+    from ppopt.mp_solvers.solve_mpqp import solve_mpqp, mpqp_algorithm
     solution = solve_mpqp(prog, mpqp_algorithm.combinatorial)
 
 This step may take several minutes if your problem has thousands of regions.
