@@ -39,7 +39,6 @@ def solve_qp_quadprog(Q: numpy.ndarray, c: numpy.ndarray, A: numpy.ndarray, b: n
 
     :return: A SolverOutput object if optima found, otherwise None.
     """
-
     try:
         if equality_constraints is None:
             equality_constraints = []
@@ -79,6 +78,6 @@ def solve_qp_quadprog(Q: numpy.ndarray, c: numpy.ndarray, A: numpy.ndarray, b: n
 
         return SolverOutput(opt, x_star, slack.flatten(), numpy.array(active).astype('int64'), lagrange)
 
-    except ValueError as e:
+    except ValueError as _:
         # just swallow the error as something happened Infeasibility or non-symmetry
         return None

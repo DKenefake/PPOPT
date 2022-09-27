@@ -20,10 +20,10 @@ This optimization problem leads to the following multiparametric optimization pr
 Using PPOPT, this is translated as the following python code. (The latex above was generated for me with ``prog.latex()`` if you were wondering if I typed that all out by hand.)
 
 .. code:: python
-    
+
     import numpy
     from ppopt.mpqp_program import MPQP_Program
-        
+
     A = numpy.array([[1, 1, 0, 0], [0, 0, 1, 1], [-1, 0, -1, 0], [0, -1, 0, -1], [-1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, -1]])
     b = numpy.array([350, 600, 0, 0, 0, 0, 0, 0]).reshape(8, 1)
     c = numpy.array([25, 25, 25, 25]).reshape(-1,1)

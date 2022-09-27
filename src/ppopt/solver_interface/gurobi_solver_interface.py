@@ -46,7 +46,6 @@ def solve_miqp_gurobi(Q: numpy.ndarray = None, c: numpy.ndarray = None, A: numpy
     variables, output['dual'] = dual variables, output['obj'] = objective value, output['const'] = slacks,
     output['active'] = active constraints.
     """
-
     model = gp.Model()
 
     if not verbose:
@@ -65,10 +64,12 @@ def solve_miqp_gurobi(Q: numpy.ndarray = None, c: numpy.ndarray = None, A: numpy
         model.setParam("Method", 0)
         model.setParam("Quad", 0)
 
-    # model.setParam('NumericFocus', 3)
-    # model.setParam("FeasibilityTol", 10 ** (-9))
-    # model.setParam("OptimalityTol", 10 ** (-9))
-    # model.setParam("Presolve", 2)
+    # in the case of non-convex QPs add the non-convex flag, set the MIP gap the 0 we want exact solutions
+    if Q is not None:
+        if numpy.min(numpy.linalg.eigvalsh(Q)) < 0:
+            model.Params.NonConvex = 2
+            # noinspection SpellCheckingInspection
+            model.Params.MIPgap = 0
 
     # define num variables and num constraints variables
     num_vars, num_constraints = get_program_parameters(Q, c, A, b)
@@ -192,13 +193,7 @@ def solve_lp_gurobi(c: numpy.ndarray, A: numpy.ndarray, b: numpy.ndarray, equali
 
     :return: A SolverOutput Object
     """
-
-    # Simple short cuts that indicate a unbounded or infeasible LP
-
-    if A is None or b is None:
-        return None
-
-    if numpy.size(A) == 0 or numpy.size(b) == 0:
+    if not gurobi_pretest(A, b):
         return None
 
     return solve_miqp_gurobi(c=c, A=A, b=b, equality_constraints=equality_constraints, verbose=verbose,
@@ -236,11 +231,25 @@ def solve_milp_gurobi(c: numpy.ndarray, A: numpy.ndarray, b: numpy.ndarray,
 
     :return:  A SolverOutput Object
     """
-    if A is None or b is None:
-        return None
-
-    if numpy.size(A) == 0 or numpy.size(b) == 0:
+    if not gurobi_pretest(A, b):
         return None
 
     return solve_miqp_gurobi(c=c, A=A, b=b, equality_constraints=equality_constraints, bin_vars=bin_vars,
                              verbose=verbose, get_duals=get_duals)
+
+
+def gurobi_pretest(A, b) -> bool:
+    """
+    Simple shortcuts that indicate an unbounded or infeasible LP
+
+    :param A: LHS Matrix
+    :param b: RHS Vector
+    :return: True is not trivial unbounded or infeasible constraints
+    """
+    if A is None or b is None:
+        return False
+
+    if numpy.size(A) == 0 or numpy.size(b) == 0:
+        return False
+
+    return True

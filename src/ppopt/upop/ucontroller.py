@@ -1,4 +1,4 @@
-# The purpose of this is to generate C++ code for to use for micro controller but
+# The purpose of this is to generate C++ code for to use for microcontroller but
 # There are hopes to expand to further outreach such as generating dlls or .so
 # or other language output to use solutions in other languages without needing a
 # new ppopt in every language
@@ -10,21 +10,20 @@ import numpy
 from ..critical_region import CriticalRegion
 from ..solution import Solution
 from ..solver_interface.solver_interface import solve_lp
-from ..upop.upop_utils import find_unique_region_hyperplanes, find_unique_region_functions
 from ..utils.general_utils import make_column
 
 
 def determine_hyperplane(regions: List[CriticalRegion], hyper_planes: numpy.ndarray):
     """
-    Finds the 'best' splitting hyper plane for this task\n
+    Finds the 'best' splitting hyper plane for this task.
 
-    In this case best means minimizing the number of intersected regions while also maximizing the difference between supported and not supported regions
+    In this case best means minimizing the number of intersected regions while also maximizing the difference between
+    supported and not supported regions.
 
     :param regions:
     :param hyper_planes:
     :return: []
     """
-
     best_index = 0
     best_support = list()
     best_not_support = list()
@@ -35,7 +34,7 @@ def determine_hyperplane(regions: List[CriticalRegion], hyper_planes: numpy.ndar
 
     # TODO: Implement redundant hyperplane removal for speedup
 
-    remove_hyper_plan = list()
+    # remove_hyper_plan = list()
 
     for i in range(hyper_planes.shape[0]):
 
@@ -74,7 +73,7 @@ def classify_polytope(region: CriticalRegion, hyper_plane: numpy.ndarray) -> int
     max ||<x,A>||-d for x in Critical region \n
     min ||<x,A>||-d for x in Critical region \n
 
-    The result of the objective function will tell us the side of the hyper plane the point is on
+    The result of the objective function will tell us the side of the hyper plane the point is on.
 
     :param region: Critical region
     :param hyper_plane: A fundamental hyperplane
@@ -106,7 +105,12 @@ def classify_polytope(region: CriticalRegion, hyper_plane: numpy.ndarray) -> int
 
 
 class BVH:
+    """
+    This is the Bounding Volume Hierarchy (BVH) class that decomposes the space that allows point location acceleration
+    """
+
     def __init__(self, parent, fundamental_list, region_list, depth, index):
+        """Initializes the BVH based on a recursive constructor."""
         self.depth = depth
         self.is_leaf = False
         self.region = -1
@@ -124,18 +128,17 @@ class BVH:
 
 def generate_code(solution: Solution) -> List[str]:
     """
-    Generates C++17 code for point location and function evaluation on microcontrollers \n
-
-    This forms a BVH to accelerate solution times \n
-
-    WARNING: This breaks down at high dimensions
+    Generates C++17 code for point location and function evaluation on microcontrollers. This forms a BVH to
+    accelerate solution times. WARNING: This breaks down at high dimensions.
 
     :param solution: a solution to a MPLP or MPQP solution
     :return: List of the strings of the C++17 datafiles that integrate with uPOP
     """
 
-    fundamental_c, original_c, parity_c = find_unique_region_hyperplanes(solution)
+    # TODO: Finish Implementation
 
-    fundamental_f, original_f, parity_f = find_unique_region_functions(solution)
+    # fundamental_c, original_c, parity_c = find_unique_region_hyperplanes(solution)
+
+    # fundamental_f, original_f, parity_f = find_unique_region_functions(solution)
 
     return ["None"]

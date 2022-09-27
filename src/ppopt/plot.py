@@ -4,13 +4,33 @@ from typing import List
 
 import numpy
 import plotly.graph_objects as go
-import pypoman
+from .solver import Solver
 from matplotlib import pyplot
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Polygon
 
 from .solution import Solution
 from .utils.general_utils import make_column
+
+
+def vertex_enumeration_2d(A: numpy.ndarray, b: numpy.ndarray, solver: Solver) -> List[numpy.ndarray]:
+    """
+    Computes the vertices of a 2D polytope from the half space representation, uses a naive O(n^2) algorithm but is
+    sufficient for plotting purposes
+
+    Generates vertices for the 2D polytope of the following structure Ax <= b
+
+    :param solver:
+    :param A: The left-hand side constraint matrix
+    :param b: The right-hand side constraint matrix
+    :return: List of vertices
+    """
+
+    num_constrs = A.shape[0]
+    trials = [[i, j] for i in range(num_constrs) for j in range(i + 1, num_constrs)]
+    res = map(lambda comb: solver.solve_lp(None, A, b, comb), trials)
+    filtered_res = filter(lambda x: x is not None, res)
+    return list(map(lambda x: x.sol, filtered_res))
 
 
 def sort_clockwise(vertices: List[numpy.ndarray]) -> List[numpy.ndarray]:
@@ -21,16 +41,8 @@ def sort_clockwise(vertices: List[numpy.ndarray]) -> List[numpy.ndarray]:
     :return:
     """
 
-    # find the center
-    x_center = 0
-    y_center = 0
-    for i in vertices:
-        x_center += i[0]
-        y_center += i[1]
-
-    x_center = x_center / len(vertices)
-    y_center = y_center / len(vertices)
-    return sorted(vertices, key=lambda x: atan2((x[1] - y_center), (x[0] - x_center)))
+    center = sum(vertices, numpy.array([0, 0])) / len(vertices)
+    return sorted(vertices, key=lambda x: atan2((x[1] - center[1]), (x[0] - center[0])))
 
 
 # TODO: specify dimensions to fix
@@ -42,11 +54,11 @@ def gen_vertices(solution: Solution):
     :return: a list of a collection of vertices sorted counterclockwise that correspond to the specific region
 
     """
-    vertex_list = list()
-    for region in solution.critical_regions:
-        vertices = pypoman.compute_polytope_vertices(region.E, region.f)
-        vertex_list.append(sort_clockwise(vertices))
-    return vertex_list
+
+    solver_obj = solution.program.solver
+    cr_vertices = map(lambda cr: vertex_enumeration_2d(cr.E, cr.f, solver_obj), solution.critical_regions)
+    sorted_vertices = map(lambda verts: sort_clockwise(verts), cr_vertices)
+    return list(sorted_vertices)
 
 
 def plotly_plot(solution: Solution, save_path: str = None, show=True) -> None:
@@ -97,10 +109,16 @@ def parametric_plot(solution: Solution, save_path: str = None, show=True) -> Non
     :param show: Keyword argument, if True displays the plot otherwise does not display
     :return: no return, creates graph of solution
     """
+
+    # check if the solution is actually 2 dimensional
+    if solution.theta_dim() != 2:
+        print(f"Solution is not 2D, the dimensionality of the solution is {solution.theta_dim()}")
+        return None
+
     vertex_list = gen_vertices(solution)
     polygon_list = [Polygon(v) for v in vertex_list]
 
-    fig, ax = pyplot.subplots()
+    _, ax = pyplot.subplots()
 
     cm = pyplot.cm.get_cmap('Paired')
     colors = 100 * numpy.random.rand(len(solution.critical_regions))
@@ -112,7 +130,7 @@ def parametric_plot(solution: Solution, save_path: str = None, show=True) -> Non
     pyplot.autoscale()
 
     if save_path is not None:
-        pyplot.savefig(save_path + str(time.time()) + ".png", dpi=1000)
+        pyplot.savefig(save_path + ".png", dpi=1000)
 
     if show:
         pyplot.show()
@@ -138,7 +156,7 @@ def parametric_plot_1D(solution: Solution, save_path: str = None, show=True) -> 
     # x_dim = solution.program.num_x()
 
     # set up the plotting object
-    fig, ax = pyplot.subplots()
+    _, ax = pyplot.subplots()
 
     # plot the critical regions w.r.t. x*
     for critical_region in solution.critical_regions:

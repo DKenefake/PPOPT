@@ -25,7 +25,6 @@ def full_process(center: numpy.ndarray, norm: numpy.ndarray, radius: float, prog
     :param current_active_set: list of the active set that we are stepping out of
     :return: The identified Critical Region on the other side of the facet, and the facets of this critical region or None of nothing
     """
-
     found_solution = fathem_facet(center, norm, radius, program, current_active_set, indexed_region_as)
 
     # this will return a None
@@ -46,7 +45,6 @@ def solve(program: MPQP_Program, active_set=None, num_cores=-1) -> Optional[Solu
     :param num_cores: number of cores to run this calculation on, default of -1 means use all available cores
     :return: the solution to the multiparametric optimization problem
     """
-
     if active_set is None:
         active_set = program.gen_optimal_active_set()
         print(f'Using a found active set {active_set}')
@@ -95,7 +93,7 @@ def solve(program: MPQP_Program, active_set=None, num_cores=-1) -> Optional[Solu
 
                 # check to see if we have found this region before
                 if tuple(found_cr.active_set) not in indexed_region_as:
-                    # if we haven't add it to the active set index
+                    # if we haven't added it to the active set index
                     indexed_region_as.add(tuple(found_cr.active_set))
                     # add it to the solution
                     solution.add_region(found_cr)

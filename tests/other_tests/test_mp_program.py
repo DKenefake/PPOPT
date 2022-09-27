@@ -21,7 +21,7 @@ def linear_program() -> MPLP_Program:
     b_t = numpy.ones((10, 1))
     c = numpy.ones((3, 1))
     H = numpy.zeros((A.shape[1], F.shape[1]))
-    return MPLP_Program(A, b, c, H, A_t, b_t, F, [0])
+    return MPLP_Program(A, b, c, H, A_t, b_t, F, equality_indices = [0])
 
 
 @pytest.fixture()
@@ -135,7 +135,7 @@ def test_warnings_10(linear_program):
 
 
 def test_latex_lp(linear_program):
-    output = linear_program.latex()
+    _ = linear_program.latex()
 
     # supress output of print
     sys_stdout = sys.stdout
@@ -188,7 +188,7 @@ def test_warnings_qp_4(quadratic_program):
 
 
 def test_latex(quadratic_program):
-    output = quadratic_program.latex()
+    _ = quadratic_program.latex()
 
     # supress output of print
     sys_stdout = sys.stdout
@@ -209,5 +209,5 @@ def test_solve_theta_mpqp_1(simple_qp_program):
     print(soln)
     assert numpy.allclose(soln.sol, numpy.array([0]))
     assert numpy.allclose(soln.dual, numpy.array([0, 0]))
-    assert numpy.allclose(soln.slack, numpy.array([3.8890873, 0]))
+    assert numpy.allclose(soln.slack, numpy.array([5.5, 0]))
     assert numpy.allclose(soln.active_set, numpy.array([1]))

@@ -5,16 +5,14 @@ from ..mplp_program import MPLP_Program
 
 class mplp_solver(Enum):
     Dustin = '1'
-    pass
 
 
 def solve_mplp(problem: MPLP_Program, algorithm: mplp_solver = mplp_solver.Dustin):
     """
-    This is the main solver interface for MPLP type problems
+    This is the main solver interface for MPLP type problems.
 
     :param problem:
     :param algorithm:
     :return:
     """
-
     pass

@@ -8,7 +8,7 @@ from src.ppopt.utils.general_utils import make_column
 
 @pytest.fixture()
 def region() -> CriticalRegion:
-    """A square critical region with predictable properties"""
+    """A square critical region with predictable properties."""
     A = numpy.eye(2)
     b = numpy.zeros((2, 1))
     C = numpy.eye(2)
@@ -41,14 +41,14 @@ def test_lagrange_multipliers(region):
 
 def test_is_inside_1(region):
     num_tests = 10
-    for i in range(num_tests):
+    for _ in range(num_tests):
         theta = numpy.random.random((2, 1))
         assert region.is_inside(theta)
 
 
 def test_is_inside_2(region):
     num_tests = 10
-    for i in range(num_tests):
+    for _ in range(num_tests):
         theta = numpy.random.random((2, 1)) - numpy.array([[1], [1]])
         assert not region.is_inside(theta)
 

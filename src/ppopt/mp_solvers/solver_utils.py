@@ -9,7 +9,8 @@ from ..utils.mpqp_utils import gen_cr_from_active_set
 
 
 class CombinationTester:
-    """This keeps track of all of the infeasible active set combinations and filters prospective active set combinations"""
+    """Keeps track of all the infeasible active set combinations and filters prospective active set
+    combinations """
 
     def __init__(self):
         """
@@ -24,11 +25,11 @@ class CombinationTester:
     def check(self, active_set: Set[int]) -> bool:
         """
         Checks if the provided active set combination is a superset of a previously tested infeasible active set
+
         :param active_set:
         :return: False if it should be culled and not tested any further, True if the set could be feasible
         """
-
-        if type(active_set) is not Set:
+        if not isinstance(active_set, set):
             active_set = set(tuple(active_set))
 
         if not active_set:
@@ -41,28 +42,30 @@ class CombinationTester:
         return True
 
     def add_combo(self, active_set) -> None:
-        if type(active_set) is tuple:
+        if isinstance(active_set, tuple):
             self.combos.add(active_set)
-        if type(active_set) is not set:
+        if not isinstance(active_set, set):
             self.combos.add(tuple(active_set))
 
     def add_combos(self, set_list: Set[Tuple[int]]) -> None:
         self.combos.update(set_list)
 
 
-def generate_reduce(candidate: tuple, murder_list=None, attempted=None) -> list:
-    # check = lambda x: True
-
+def manufacture_lambda(attempted, murder_list):
     if attempted is None:
         if murder_list is None:
-            check = lambda x: True
+            return lambda x: True
         else:
-            check = lambda x: not murder_list.hassubset(x)
+            return lambda x: not murder_list.hassubset(x)
     else:
         if murder_list is None:
-            check = lambda x: x not in attempted
+            return lambda x: x not in attempted
         else:
-            check = lambda x: x not in attempted and not murder_list.hassubset(x)
+            return lambda x: x not in attempted and not murder_list.hassubset(x)
+
+
+def generate_reduce(candidate: tuple, murder_list=None, attempted=None) -> list:
+    check = manufacture_lambda(attempted, murder_list)
 
     accepted_sets = list()
 
@@ -76,6 +79,7 @@ def generate_reduce(candidate: tuple, murder_list=None, attempted=None) -> list:
 
 def generate_extra(candidate: tuple, expansion_set, murder_list=None, attempted=None) -> list:
     """
+    Special routine for graph based algorithm
 
     :param candidate:
     :param expansion_set:
@@ -83,17 +87,8 @@ def generate_extra(candidate: tuple, expansion_set, murder_list=None, attempted=
     :param attempted:
     :return:
     """
-    # TODO simplify this and the above version of this problem (perhaps extract and subs?)
-    if attempted is None:
-        if murder_list is None:
-            check = lambda x: True
-        else:
-            check = lambda x: not murder_list.hassubset(x)
-    else:
-        if murder_list is None:
-            check = lambda x: x not in attempted
-        else:
-            check = lambda x: x not in attempted and not murder_list.hassubset(x)
+    check = manufacture_lambda(attempted, murder_list)
+
     accepted_sets = list()
 
     for regular_constraint in expansion_set:
@@ -118,8 +113,6 @@ def find_optimal_set(problem) -> List[int]:
     super_checker = CombinationTester()
 
     feasible_set = [problem.equality_indices]
-
-    # feasible_set = generate_children(problem.equality_indices, problem.num_constraints(), super_checker)
 
     print(feasible_set)
     while True:
@@ -155,10 +148,11 @@ def find_optimal_set(problem) -> List[int]:
 def generate_children_sets(active_set, num_constraints: int, murder_list=None):
     # takes the active set and then generates all super sets of higher cardinality
 
-    check = lambda x: True
-
-    if murder_list is not None:
-        check = lambda x: murder_list.check(x)
+    def check(x) -> bool:
+        if murder_list is not None:
+            return murder_list.check(x)
+        else:
+            return True
 
     if len(active_set) == 0:
         return [[i] for i in range(num_constraints) if check([i])]
@@ -168,14 +162,13 @@ def generate_children_sets(active_set, num_constraints: int, murder_list=None):
 
 def get_facet_centers(A: numpy.ndarray, b: numpy.ndarray) -> list:
     r"""
-    This takes the polytope P := {x \in R^n : Ax <= b} and finds all of the chebychev centers and normal vectors of each
+    This takes the polytope P := {x \in R^n : Ax <= b} and finds all the chebychev centers and normal vectors of each
     facet and the radius
 
     :param A: The LHS constraint matrix
     :param b: The RHS constraint matrix
-    :return: a list with an tuple for each facet in the polytope (chebychev center, facet normal vector, chebychev radius)
+    :return: a list with a tuple for each facet in the polytope (chebychev center, facet normal vector, chebychev radius)
     """
-
     facet_centers = []
 
     for facet_index in range(A.shape[0]):
@@ -240,7 +233,7 @@ def fathem_facet(center: numpy.ndarray, normal: numpy.ndarray, radius: float, pr
         sol = program.solve_theta(test_point)
 
         # test to see if the theta substituted optimization function is not feasible
-        # this happens when we are looking outside of the feasible space -> no longer need to look further
+        # this happens when we are looking outside the feasible space -> no longer need to look further
         if sol is None:
             # print('Is not Feasible!')
             return None

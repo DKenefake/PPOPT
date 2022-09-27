@@ -11,7 +11,8 @@ from ..utils.general_utils import make_column, num_cpu_cores
 from ..utils.mpqp_utils import gen_cr_from_active_set
 
 
-def fathem_facet_exp(center: numpy.ndarray, normal: numpy.ndarray, radius: float, program, current_active_set: list) -> Optional[List]:
+def fathem_facet_exp(center: numpy.ndarray, normal: numpy.ndarray, radius: float, program, current_active_set: list) -> \
+        Optional[List]:
     # make sure we are pointing in the correct direction
     center = make_column(center)
     normal = make_column(normal)
@@ -28,7 +29,7 @@ def fathem_facet_exp(center: numpy.ndarray, normal: numpy.ndarray, radius: float
         sol = program.solve_theta(test_point)
 
         # test to see if the theta substituted optimization function is not feasible
-        # this happens when we are looking outside of the feasible space -> no longer need to look further
+        # this happens when we are looking outside the feasible space -> no longer need to look further
         if sol is None:
             return None
 
@@ -64,12 +65,12 @@ def full_process_2(program, current_active_set):
 
 def fathem_initial_active_sets(program: MPQP_Program, initial_active_sets: List[List[int]] = None):
     """
+    Covers an initial active set
 
     :param program:
     :param initial_active_sets:
     :return:
     """
-
     cr_gen = lambda active_set: gen_cr_from_active_set(program=program, active_set=active_set, check_full_dim=True)
 
     crs = [cr for cr in map(cr_gen, initial_active_sets) if cr is not None]
@@ -94,7 +95,6 @@ def solve(program: MPQP_Program, initial_active_sets: List[List[int]] = None, nu
     :param num_cores: number of cores to run this calculation on, default of -1 means use all available cores
     :return: the solution to the multiparametric optimization problem
     """
-
     if initial_active_sets is None:
         initial_active_sets = [program.gen_optimal_active_set()]
         print(f'Using a found active set {initial_active_sets[-1]}')
@@ -151,7 +151,7 @@ def solve(program: MPQP_Program, initial_active_sets: List[List[int]] = None, nu
 
             # check to see if we have found this region before
             if tuple(found_cr.active_set) not in indexed_region_as:
-                # if we haven't add it to the active set index
+                # if we haven't added it to the active set index
                 indexed_region_as.add(tuple(found_cr.active_set))
                 # add it to the solution
                 solution.add_region(found_cr)

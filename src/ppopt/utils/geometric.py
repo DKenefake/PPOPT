@@ -33,14 +33,15 @@ def gen_tess_points_simplex(simplex):
         tess[i] = simplex[i]
 
     index = length
-    for i in range(len(simplex)):
-        for j in range(i + 1, len(simplex)):
+    extent = len(simplex)
+    for i in range(extent):
+        for j in range(i + 1, extent):
             tess[index] = .5 * (simplex[i] + simplex[j])
             index += 1
     return tess
 
 
-# this adds only one sub division point but in a pseudo optimal spot
+# this adds only one subdivision point but in a pseudo optimal spot
 @jit(nopython=True)
 def revised_tess_simplex(simplex, half_split=False):
     # find the longest and shortest edges
@@ -62,7 +63,7 @@ def revised_tess_simplex(simplex, half_split=False):
                 longest_index_i = i
                 longest_index_j = j
 
-    # enforce that I do not want a simplex more bent then ~30 60 90
+    # enforce that I do not want a simplex more bent than ~30 60 90
     # cuts the simplex into 2 based on the longest edge
 
     if longest_so_far >= 1.7 * shortest_so_far or half_split:

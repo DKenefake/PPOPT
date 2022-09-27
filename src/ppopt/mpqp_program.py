@@ -20,15 +20,16 @@ class MPQP_Program(MPLP_Program):
         A_\theta \theta &\leq b_\theta\\
         x &\in R^n\\
         \end{align}
-
     """
 
     def __init__(self, A: numpy.ndarray, b: numpy.ndarray, c: numpy.ndarray, H: numpy.ndarray, Q: numpy.ndarray,
                  A_t: numpy.ndarray,
-                 b_t: numpy.ndarray, F: numpy.ndarray,
-                 active_set=None):
+                 b_t: numpy.ndarray, F: numpy.ndarray, c_c: Optional[numpy.ndarray] = None,
+                 c_t: Optional[numpy.ndarray] = None, Q_t: Optional[numpy.ndarray] = None,
+                 equality_indices=None, solver=None):
+        """Initialized the MPQP_Program."""
         # calls MPLP_Program's constructor to reduce out burden
-        super(MPQP_Program, self).__init__(A, b, c, H, A_t, b_t, F, active_set)
+        super(MPQP_Program, self).__init__(A, b, c, H, A_t, b_t, F, c_c, c_t, Q_t, equality_indices, solver)
 
         # assignees member variables
         self.Q = Q
@@ -39,20 +40,19 @@ class MPQP_Program(MPLP_Program):
 
     def evaluate_objective(self, x, theta_point):
         r"""
-        Evaluates the objective of the Mutliparametric program. for a given x and Θ.
+        Evaluates the objective of the multiparametric program. for a given x and Θ.
 
         .. math::
-
             \frac{1}{2}x^TQx + \theta^TH^Tx+c^Tx
 
         :param x: x input
         :param theta_point: θ input
         :return: Objective function evaluated at x, θ
         """
-        return 0.5 * x.T @ self.Q @ x + theta_point.T @ self.H.T @ x + self.c.T @ x
+        return 0.5 * x.T @ self.Q @ x + theta_point.T @ self.H.T @ x + self.c.T @ x + self.c_c + self.c_t.T @ theta_point + 0.5 * theta_point.T @ self.Q_t @ theta_point
 
     def warnings(self) -> List[str]:
-        """Checks the dimensions of the matrices to ensure consistency"""
+        """Checks the dimensions of the matrices to ensure consistency."""
         warning_list = MPLP_Program.warnings(self)
 
         # Quadratic Problem specific warnings
@@ -70,7 +70,7 @@ class MPQP_Program(MPLP_Program):
 
         # check the condition number of the matrix and make sure it is invertible
         if self.Q.shape[0] == self.Q.shape[1]:
-            e_values, e_vectors = numpy.linalg.eig(self.Q)
+            e_values, _ = numpy.linalg.eig(self.Q)
             if len(e_values) < 0:
                 warning_list.append(f'Non-convex quadratic program detected, with eigenvalues {e_values}')
             elif len(e_values) < 10 ** -4:
@@ -80,7 +80,7 @@ class MPQP_Program(MPLP_Program):
         return warning_list
 
     def latex(self) -> List[str]:
-        """Creates a latex output for the multiparametric problem"""
+        """Creates a latex output for the multiparametric problem."""
         # calls the latex function inherited from MPLP to get most of the output
         output = super(MPQP_Program, self).latex()
 
@@ -106,7 +106,6 @@ class MPQP_Program(MPLP_Program):
         Substitutes theta into the multiparametric problem and solves the following optimization problem
 
         .. math::
-
             \min_{x} \frac{1}{2}x^TQx + \tilde{c}^Tx
 
         .. math::
@@ -120,9 +119,19 @@ class MPQP_Program(MPLP_Program):
         :param deterministic_solver: Deterministic solver to use to solve the above quadratic program
         :return: The Solver output of the substituted problem, returns None if not solvable
         """
-        return self.solver.solve_qp(Q=self.Q, c=self.H @ theta_point + self.c, A=self.A,
-                                    b=self.b + (self.F @ theta_point),
-                                    equality_constraints=self.equality_indices)
+
+        if not numpy.all(self.A_t @ theta_point <= self.b_t):
+            return None
+
+        sol_obj = self.solver.solve_qp(Q=self.Q, c=self.H @ theta_point + self.c, A=self.A,
+                                       b=self.b + (self.F @ theta_point),
+                                       equality_constraints=self.equality_indices)
+
+        if sol_obj is not None:
+            sol_obj.obj += self.c_c + self.c_t.T @ theta_point + 0.5 * theta_point.T @ self.Q_t @ theta_point
+            return sol_obj
+
+        return None
 
     def optimal_control_law(self, active_set: List[int]) -> Tuple:
         r"""
